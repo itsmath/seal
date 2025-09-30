@@ -1,40 +1,4 @@
-#![feature(default_field_values)]
-use crate::{prelude::*, setup::SetupOptions};
-use mluau::prelude::*;
-
-use std::env;
-use std::ffi::OsString;
-use std::collections::VecDeque;
-use std::fs::{self, OpenOptions};
-use std::io::Write;
-
-pub mod prelude;
-mod std_env;
-mod std_fs;
-mod std_json;
-mod std_process;
-mod std_time;
-pub mod table_helpers;
-#[macro_use]
-mod err;
-mod globals;
-mod interop;
-mod require;
-mod std_crypt;
-mod std_io;
-mod std_net;
-mod std_serde;
-mod std_str_internal;
-mod std_thread;
-mod std_luau;
-mod std_err;
-mod sealconfig;
-mod setup;
-mod compile;
-
-use err::display_error_and_exit;
-use sealconfig::SealConfig;
-use globals::SEAL_VERSION;
+use seal::*;
 
 type LuauLoadResult = LuaResult<Option<LuauLoadInfo>>;
 struct LuauLoadInfo {
