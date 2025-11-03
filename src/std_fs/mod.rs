@@ -907,6 +907,52 @@ pub fn fs_unsymlink(_luau: &Lua, link: String) -> LuaResult<bool> {
     }
 }
 
+fn fs_readlink(luau: &Lua, value: LuaValue) -> LuaValueResult {
+    let function_name = "fs.readlink(symlink: string)";
+    let link = match value {
+        LuaValue::String(path) => validate_path_without_checking_fs(&path, function_name)?,
+        LuaNil => {
+            return wrap_err!("{} expected symlink to be a string, got nil");
+        },
+        other => {
+            return wrap_err!("{} expected symlink to be a string, got: {:?}", function_name, other);
+        }
+    };
+
+    match fs::symlink_metadata(&link) {
+        Ok(metadata) if metadata.is_symlink() => (),
+        Ok(metadata) if metadata.is_dir() => {
+            return wrap_err!("{}: path '{}' leads to a real directory, not a symlink", function_name, &link);
+        },
+        Ok(metadata) if metadata.is_file() => {
+            return wrap_err!("{}: path '{}' leads to a real file, not a symlink", function_name, &link);
+        },
+        Ok(_) => {
+            return wrap_err!("{}: path '{}' isn't a symlink", function_name, &link);
+        },
+        Err(err) => match err.kind() {
+            io::ErrorKind::NotFound => {
+                return wrap_err!("{}: path '{}' not found", function_name, &link);
+            },
+            io::ErrorKind::PermissionDenied => {
+                return wrap_err!("{}: can't remove symlink at '{}' because permission denied", function_name, &link);
+            },
+            _ => {
+                return wrap_err!("{}: error getting symlink metadata: {}", function_name, err);
+            }
+        }
+    }
+
+    let followed = match fs::read_link(&link) {
+        Ok(path) => path,
+        Err(err) => {
+            return wrap_err!("{}: unable to read symlink: {}", function_name, err);
+        }
+    };
+
+    ok_string(followed.display().to_string(), luau)
+}
+
 pub fn fs_watch(luau: &Lua, mut multivalue: LuaMultiValue) -> LuaValueResult {
     let function_name = "fs.watch(paths: string | { string })";
     let paths = match multivalue.pop_front() {

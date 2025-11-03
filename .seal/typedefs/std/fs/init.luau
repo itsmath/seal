@@ -129,6 +129,15 @@ export type fs = {
 	]=]
 	unsymlink: (link: string) -> boolean,
 
+	--[=[
+		Follows `symlink` and returns the *path* targeted by the symlink.
+
+		## Errors
+
+		- if `symlink` is not a symlink, does not exist on the filesystem, or is permission denied
+	]=]
+	readlink: (symlink: string) -> string,
+
 	--> fs.watch(paths: string | { string }, options: WatchOptions)
 	--[=[
 		Watch for filesystem changes on one or more `paths`.
