@@ -1,5 +1,5 @@
 local fs = require("@self/../../typedefs/std/fs")
-local str = require("@@self/../../typedefs/std/str")
+local str = require("@self/../../typedefs/std/str")
 local output = require("@self/../../typedefs/std/io/output")
 
 local types = require("@self/types")
